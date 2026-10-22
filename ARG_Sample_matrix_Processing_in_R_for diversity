@@ -1,0 +1,38 @@
+#Prepare RPKM ARG data file so that ARG names are columns (Y) and Sample names are Rows (X)
+#load ecology module
+  library(vegan)
+
+#read in csv, make sure to use row.names, check.names and header options
+#to stop The first row and column (containing samples and ARGs) from being edited
+  df <- read.csv("master_FPKM_transposed.csv", row.names =1, header = TRUE, check.names = FALSE)
+
+#Create Presence-Absence binary dataframe to apply a prevalence threshold
+  df_binary <- df
+  df_binary[df_binary > 0] <- 1
+  prevalence_threshold <- 0.1
+#LOGIC: R uses [actions on rows, actions on columns]. The command creates a new dataframe. Where the average of each column's 
+#presences are taken and if they arent present in 10% of samples, they are excised.
+  df_prev_filt <- df_binary[, colMeans(df_binary) >= prevalence_threshold]
+#78 Samples, 47 Args  <- 78 Samples, 818 Args
+
+#Removing any samples with only absent (0) data
+  df_prev_sample_filt <- df_prev_filt[rowSums(df_prev_filt) > 0, ]
+#Which Sample was removed
+  Sample_lost_due_to_absent_data <- setdiff(rownames(df_prev_filt), rownames(df_prev_sample_filt))
+#this excised S59
+
+#removing samples with very low overall abundance and read counts that may bias findings  (day 0)
+D0_excise <- c("S56", "S57", "S58", "S59", "S60", "S61")
+#LOGIC: Take the list of samples and do the opposite ([!) of keeping them (rownames(df) %in% D0_excise 
+df_prev_samp_D0_filt <- df_prev_sample_filt[!(rownames(df_prev_sample_filt) %in% D0_excise), ]
+72 Samples, 47 ARGs
+
+#We now want the RPKM data (not binary) for downstream alpha diversity stats
+#We will extract lists of the samples and ARGs that have not been filtered out
+#We will modify the original raw data to include only Samples (no D0) and ARGs of interest
+  Filtered_Samples <- rownames(df_prev_samp_D0_filt)
+  Filtered_ARGs <- colnames(df_prev_samp_D0_filt)
+  ARG_rpkm_filt <- df[(rownames(df) %in% Filtered_Samples), ]
+  ARG_rpkm_filt <- df[, (colnames(df) %in% Filtered_ARGs)]
+  ARG_rpkm_filt <- df[!(rownames(df) %in% D0_excise), ]
+

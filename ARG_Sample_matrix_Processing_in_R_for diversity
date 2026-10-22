@@ -34,5 +34,5 @@ df_prev_samp_D0_filt <- df_prev_sample_filt[!(rownames(df_prev_sample_filt) %in%
   Filtered_ARGs <- colnames(df_prev_samp_D0_filt)
   ARG_rpkm_filt <- df[(rownames(df) %in% Filtered_Samples), ]
   ARG_rpkm_filt <- df[, (colnames(df) %in% Filtered_ARGs)]
-  ARG_rpkm_filt <- df[!(rownames(df) %in% D0_excise), ]
+  ARG_rpkm_filt <- ARG_rpkm_filt[!(rownames(ARG_rpkm_filt) %in% D0_excise), ]
 

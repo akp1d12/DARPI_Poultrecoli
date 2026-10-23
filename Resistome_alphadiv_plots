@@ -17,3 +17,13 @@
   model_InvSi_age <- lm(InvSimpson ~ Age, data = Meta_Alphadiv)
   model_Obs_2x2 <- lm(Observed ~ ESBL * AB, data = Meta_Alphadiv)
   model_Obs_age <- lm(Observed ~ Age, data = Meta_Alphadiv)
+#Testing Residuals of linear model for normalcy
+  resid_shan_age <- residuals(model_shan_age)
+  resid_shan_2x2 <- residuals(model_shan_2x2)
+  shapiro.test(resid_shan_2x2)
+data:  resid_shan_2x2
+W = 0.96024, p-value = 0.02279
+  shapiro.test(resid_shan_age)
+Shapiro-Wilk normality test
+data:  resid_shan_age
+W = 0.96014, p-value = 0.02251

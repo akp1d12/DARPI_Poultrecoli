@@ -1,0 +1,19 @@
+#Calculate Resistome Alpha Diversity Indices, place them into a dataframe with metadata
+  library(tidyverse)
+  library(vegan)
+  observed_Richness <- specnumber(ARG_rpkm_filt)
+  shannon_div <- diversity(ARG_rpkm_filt, index = "shannon")
+  inversedSimpson <- diversity(ARG_rpkm_filt, index = "invsimpson")
+  alpha_div_ARG <- data.frame(Sample = rownames(ARG_rpkm_filt), Observed = observed_Richness, Shannon = shannon_div, InvSimpson = inversedSimpson)
+# dont use row.names =1 option since we need both dataframes to have the same first column starting with "Sample"
+  Meta <- as.data.frame(read.csv("metadata__minusD0_ARGs.csv", header = TRUE))
+  Meta_Alphadiv <- left_join(alpha_div_ARG, Meta, by= "Sample") 
+#Metadata includes Age, AB-innocluation, ESBL Innoculation as variables
+#To test normality we will put the alpha-div indices into a linear model
+#We will use a 2x2 factorial design since we are interested in seeing the main effects of AB and ESBL innolcuation but also how they interact together AB+/ESBL+
+  model_shan_2x2 <- lm(Shannon ~ ESBL * AB, data = Meta_Alphadiv)
+  model_shan_age <- lm(Shannon ~ Age, data = Meta_Alphadiv)
+  model_InvSi_2x2 <- lm(InvSimpson ~ ESBL * AB, data = Meta_Alphadiv)
+  model_InvSi_age <- lm(InvSimpson ~ Age, data = Meta_Alphadiv)
+  model_Obs_2x2 <- lm(Observed ~ ESBL * AB, data = Meta_Alphadiv)
+  model_Obs_age <- lm(Observed ~ Age, data = Meta_Alphadiv)
